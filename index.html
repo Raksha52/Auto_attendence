@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Attendance System - Student Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1>Auto Attendance System</h1>
+                <p>Student Login Portal</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="studentId">Student ID</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="studentId" name="studentId" placeholder="Enter your Student ID" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="rememberMe" name="rememberMe">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <span class="btn-text">Login</span>
+                    <div class="spinner" id="spinner"></div>
+                </button>
+
+                <div class="divider">
+                    <span>OR</span>
+                </div>
+
+                <button type="button" class="face-login-btn" onclick="initiateFaceLogin()">
+                    <i class="fas fa-camera"></i>
+                    <span>Login with Face Recognition</span>
+                </button>
+            </form>
+
+            <div class="footer">
+                <a href="#" class="forgot-password">Forgot Password?</a>
+                <p class="help-text">Need help? Contact your administrator</p>
+            </div>
+        </div>
+
+        <!-- Face Recognition Modal -->
+        <div id="faceModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Face Recognition Login</h3>
+                    <button class="close-btn" onclick="closeFaceModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="camera-container">
+                        <video id="video" autoplay muted></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                        <div class="face-overlay">
+                            <div class="face-frame"></div>
+                            <p class="instruction">Position your face within the frame</p>
+                        </div>
+                    </div>
+                    <div class="status-message" id="statusMessage">
+                        <i class="fas fa-camera"></i>
+                        <span>Initializing camera...</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress" id="progress"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="cancel-btn" onclick="closeFaceModal()">Cancel</button>
+                    <button class="capture-btn" id="captureBtn" onclick="captureAndRecognize()" disabled>
+                        <i class="fas fa-camera"></i>
+                        Capture & Recognize
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div id="messageContainer" class="message-container"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
