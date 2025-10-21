@@ -1,0 +1,17 @@
+﻿{
+  "subjects": [
+    {
+      "code": "BCS301",
+      "id": 1,
+      "name": "Database Management",
+      "teacher_id": 1
+    },
+    {
+      "code": "BCS302",
+      "id": 2,
+      "name": "Mathematics",
+      "teacher_id": 1
+    }
+  ]
+}
+
