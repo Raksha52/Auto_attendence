@@ -224,6 +224,8 @@ def student_login():
             flash('Invalid roll number or password')
             return render_template('student_login.html')
 
+        # (Removed) same-WiFi restriction — students may login without teacher IP checks
+
         # Store student session separately from teacher login
         session['student_user_id'] = student.id
         flash('Login successful')
@@ -439,6 +441,51 @@ def add_subject():
     db.session.commit()
     
     flash('Subject added successfully!')
+    return redirect(url_for('subjects'))
+
+
+@app.route('/delete_subject', methods=['POST'])
+@login_required
+def delete_subject():
+    """Delete a subject. Accepts form POST with 'subject_id'. Only the owner teacher may delete."""
+    subject_id = request.form.get('subject_id')
+    if not subject_id:
+        flash('No subject specified')
+        return redirect(url_for('subjects'))
+
+    try:
+        sid = int(subject_id)
+    except Exception:
+        flash('Invalid subject id')
+        return redirect(url_for('subjects'))
+
+    subject = Subject.query.get(sid)
+    if not subject:
+        flash('Subject not found')
+        return redirect(url_for('subjects'))
+
+    # Only the teacher who owns the subject (or an admin) can delete
+    if subject.teacher_id != current_user.id:
+        flash('You are not authorized to delete this subject')
+        return redirect(url_for('subjects'))
+
+    try:
+        # remove many-to-many association rows first to avoid orphaned references
+        try:
+            db.session.execute(student_subject.delete().where(student_subject.c.subject_id == sid))
+        except Exception:
+            pass
+        db.session.delete(subject)
+        db.session.commit()
+        flash('Subject deleted successfully')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Failed to delete subject: {str(e)}')
+
+    # Support AJAX requests
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True})
+
     return redirect(url_for('subjects'))
 
 @app.route('/students/<int:subject_id>')

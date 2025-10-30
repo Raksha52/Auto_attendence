@@ -137,6 +137,10 @@
                                         <div class="d-grid gap-2">
                                             <a href="{{ url_for('attendance', subject_id=subject.id) }}" class="btn btn-primary"><i class="fas fa-clipboard-check me-2"></i>Take Attendance</a>
                                             <a href="{{ url_for('students', subject_id=subject.id) }}" class="btn btn-outline-primary"><i class="fas fa-users me-2"></i>List of Students</a>
+                                            <form method="POST" action="{{ url_for('delete_subject') }}" onsubmit="return confirm('Delete this subject and remove its student associations? This action cannot be undone.');" style="display:inline; margin-top:6px;">
+                                                <input type="hidden" name="subject_id" value="{{ subject.id }}">
+                                                <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash me-1"></i>Delete Subject</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -275,6 +279,10 @@
                             <div class="d-grid gap-2">
                                 <a href="/attendance/${subject.id}" class="btn btn-primary"><i class="fas fa-clipboard-check me-2"></i>Take Attendance</a>
                                 <a href="/students/${subject.id}" class="btn btn-outline-primary"><i class="fas fa-users me-2"></i>List of Students</a>
+                                <form method="POST" action="/delete_subject" onsubmit="return confirm('Delete this subject and remove its student associations? This action cannot be undone.');" style="display:inline; margin-top:6px;">
+                                    <input type="hidden" name="subject_id" value="${subject.id}">
+                                    <button type="submit" class="btn btn-outline-danger"><i class="fas fa-trash me-1"></i>Delete Subject</button>
+                                </form>
                             </div>
                         </div>
                     `;
