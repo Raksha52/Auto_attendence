@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 flask==2.3.3
 flask-sqlalchemy==3.0.5
 flask-login==0.6.3
@@ -16,3 +17,14 @@ requests==2.31.0
 facenet-pytorch>=2.5.2
 torch>=2.0.0
 torchvision>=0.15.0
+=======
+Flask==2.3.3
+Flask-CORS==4.0.0
+Flask-SQLAlchemy==3.0.5
+Werkzeug==2.3.7
+opencv-python==4.8.1.78
+Pillow==10.0.1
+numpy==1.24.3
+python-dotenv==1.0.0
+gunicorn==21.2.0
+>>>>>>> a43efd88c1abf46e3eb56fc98ca023036932b734
