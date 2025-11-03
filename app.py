@@ -1,16 +1,23 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, Response, session, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+<<<<<<< HEAD
 from flask_pymongo import PyMongo # MongoDB import
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 import cv2
 import numpy as np
 import json
 import requests
 from dotenv import load_dotenv
+<<<<<<< HEAD
 from sqlalchemy import text, or_
 import base64
 import io
@@ -46,6 +53,43 @@ instance_db_rel = os.path.join('instance', 'attendance.db')
 instance_db_abs = os.path.abspath(instance_db_rel)
 # The file existence check is moved inside __name__ == '__main__' to avoid initial context issues
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db' # Always use relative path here
+=======
+from sqlalchemy import text
+import base64
+import io
+try:
+    import face_recognition
+    FACE_RECOG_AVAILABLE = True
+except Exception:
+    FACE_RECOG_AVAILABLE = False
+
+# Camera worker (lightweight capture + frame skipping)
+from camera_worker import cam_worker
+import json
+import time
+import io
+import csv
+from datetime import datetime as _dt
+try:
+    import openpyxl
+    HAVE_OPENPYXL = True
+except Exception:
+    HAVE_OPENPYXL = False
+
+load_dotenv()
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+# Prefer the instance DB if it exists (preserves shipped data), otherwise use root attendance.db
+instance_db_rel = os.path.join('instance', 'attendance.db')
+instance_db_abs = os.path.abspath(instance_db_rel)
+if os.path.exists(instance_db_abs) and os.access(instance_db_abs, os.R_OK):
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{instance_db_abs}'
+else:
+    # fallback to root DB; print warning for visibility in server logs
+    print(f'Warning: instance DB not accessible at {instance_db_abs}; falling back to attendance.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///attendance.db'
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -53,6 +97,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
+<<<<<<< HEAD
 # 🔹 Face Recognition Library Check
 try:
     import face_recognition
@@ -131,6 +176,9 @@ except Exception:
     HAVE_OPENPYXL = False
 
 # --- DATABASE MODELS ---
+=======
+# Database Models
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 class Teacher(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -148,8 +196,13 @@ class Subject(db.Model):
 # Association table for many-to-many Student <-> Subject
 student_subject = db.Table(
     'student_subject',
+<<<<<<< HEAD
     db.Column('student_id', db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), primary_key=True),
     db.Column('subject_id', db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), primary_key=True)
+=======
+    db.Column('student_id', db.Integer, db.ForeignKey('student.id'), primary_key=True),
+    db.Column('subject_id', db.Integer, db.ForeignKey('subject.id'), primary_key=True)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 )
 
 
@@ -165,7 +218,11 @@ class Student(db.Model):
 
 class StudentUser(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
     student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
+=======
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -173,16 +230,26 @@ class StudentUser(db.Model):
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
     student_id = db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), nullable=False)
+=======
+    student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     date = db.Column(db.Date, nullable=False)
     status = db.Column(db.String(10), nullable=False)  # 'present' or 'absent'
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
 class AttendanceSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+<<<<<<< HEAD
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id', ondelete='CASCADE'), nullable=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id', ondelete='CASCADE'), nullable=False)
+=======
+    subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     start_time = db.Column(db.DateTime, nullable=False)
     end_time = db.Column(db.DateTime, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
@@ -192,8 +259,12 @@ class AttendanceSession(db.Model):
 def load_user(user_id):
     return Teacher.query.get(int(user_id))
 
+<<<<<<< HEAD
 # --- FACE DETECTION SYSTEM ---
 # This class only performs simple face detection using OpenCV Haar Cascades
+=======
+# Face Detection System (Simplified)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 class FaceDetectionSystem:
     def __init__(self):
         self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -211,23 +282,37 @@ class FaceDetectionSystem:
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
         
         face_locations = []
+<<<<<<< HEAD
         # Convert OpenCV format (x, y, w, h) to face_recognition format (top, right, bottom, left)
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         for (x, y, w, h) in faces:
             face_locations.append((y, x + w, y + h, x))
         
         return face_locations
 
+<<<<<<< HEAD
 # Initialize face system later in app context
 face_system = None
 
 
 # --- ROUTES ---
+=======
+# Initialize face system after app context is available
+face_system = None
+
+# Routes
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/')
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return redirect(url_for('choose'))
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/choose')
 def choose():
     """Common landing page where user selects Teacher or Student flow."""
@@ -237,9 +322,12 @@ def choose():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+<<<<<<< HEAD
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -257,9 +345,12 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+<<<<<<< HEAD
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
         
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
@@ -298,9 +389,12 @@ def logout():
 # =========================
 @app.route('/student/login', methods=['GET', 'POST'])
 def student_login():
+<<<<<<< HEAD
     if session.get('student_user_id'):
         return redirect(url_for('student_dashboard'))
         
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if request.method == 'POST':
         roll_number = request.form.get('roll_number', '').strip()
         password = request.form.get('password', '')
@@ -314,6 +408,11 @@ def student_login():
             flash('Invalid roll number or password')
             return render_template('student_login.html')
 
+<<<<<<< HEAD
+=======
+        # (Removed) same-WiFi restriction — students may login without teacher IP checks
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         # Store student session separately from teacher login
         session['student_user_id'] = student.id
         flash('Login successful')
@@ -323,14 +422,21 @@ def student_login():
 
 @app.route('/student/register', methods=['GET', 'POST'])
 def student_register():
+<<<<<<< HEAD
     if session.get('student_user_id'):
         return redirect(url_for('student_dashboard'))
         
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         roll_number = request.form.get('roll_number', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
+<<<<<<< HEAD
+=======
+        # Accept multiple subject IDs (form should send subject_id as list when multiple select)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         subject_ids = request.form.getlist('subject_id')
 
         if not name or not roll_number or not email or not password or not subject_ids:
@@ -343,6 +449,7 @@ def student_register():
             subjects = Subject.query.all()
             return render_template('student_register.html', subjects=subjects)
 
+<<<<<<< HEAD
         # Find existing student by roll number or create a new one
         student = Student.query.filter_by(roll_number=roll_number).first()
         
@@ -366,6 +473,42 @@ def student_register():
                     student.subjects.append(sub)
             except ValueError:
                 continue # Skip invalid subject IDs
+=======
+
+        # Find existing student by roll number or create a new one
+        student = Student.query.filter_by(roll_number=roll_number).first()
+        if not student:
+            # Handle legacy DBs where student.subject_id column still exists and is NOT NULL.
+            res = db.session.execute(text("PRAGMA table_info(student);"))
+            cols = [r[1] for r in res.fetchall()]
+            if 'subject_id' in cols:
+                # insert row via SQL including subject_id (use first selected subject if present)
+                first_sid = int(subject_ids[0]) if subject_ids else None
+                now = datetime.utcnow()
+                db.session.execute(
+                    text('INSERT INTO student (name, roll_number, face_encoding, created_at, subject_id) VALUES (:name, :roll, :face, :created, :sid)'),
+                    {'name': name, 'roll': roll_number, 'face': None, 'created': now, 'sid': first_sid}
+                )
+                last_id = db.session.execute(text('SELECT last_insert_rowid()')).fetchone()[0]
+                db.session.commit()
+                student = Student.query.get(last_id)
+            else:
+                student = Student(name=name, roll_number=roll_number)
+                db.session.add(student)
+                db.session.flush()
+
+        if student.student_user:
+            flash('Account already exists for this roll number')
+            subjects = Subject.query.all()
+            return render_template('student_register.html', subjects=subjects)
+
+        # associate subjects (store associations in the new association table)
+        student.subjects = []
+        for sid in subject_ids:
+            sub = Subject.query.get(sid)
+            if sub:
+                student.subjects.append(sub)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
         student_user = StudentUser(
             student_id=student.id,
@@ -402,12 +545,19 @@ def student_dashboard():
             percent = round((present_count / total_records) * 100, 1)
         else:
             percent = None
+<<<<<<< HEAD
         
         # Determine today's status for this subject
         today = datetime.now().date()
         today_record = Attendance.query.filter_by(student_id=student.id, subject_id=subj.id, date=today).first()
         # FIX: Corrected potential AttributeError: 'NoneType' object has no attribute 'status'
         today_status = today_record.status if today_record else 'N/A' 
+=======
+        # Determine today's status for this subject
+        today = datetime.now().date()
+        today_record = Attendance.query.filter_by(student_id=student.id, subject_id=subj.id, date=today).first()
+        today_status = today_record.status if today_record else 'absent'
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
         subject_stats.append({
             'subject': subj,
@@ -419,11 +569,16 @@ def student_dashboard():
 
     return render_template('student_dashboard.html', student=student, subject_stats=subject_stats)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/student/<int:student_id>/upload_face', methods=['GET', 'POST'])
 def upload_face(student_id):
     """Page to capture multiple face images and save encodings for a student."""
     student = Student.query.get_or_404(student_id)
 
+<<<<<<< HEAD
     # Authorization Check
     is_teacher = current_user.is_authenticated
     is_student_owner = session.get('student_user_id') == student_id
@@ -440,16 +595,24 @@ def upload_face(student_id):
         if not FACE_RECOG_AVAILABLE:
             return jsonify({'success': False, 'message': 'face_recognition library not installed on server'}), 500
             
+=======
+    if request.method == 'POST':
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         data = request.get_json() or {}
         img_data = data.get('image')
         if not img_data:
             return jsonify({'success': False, 'message': 'No image data provided'}), 400
 
+<<<<<<< HEAD
+=======
+        # img_data is a data URL like 'data:image/jpeg;base64,/9j/4AAQ...'
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         header, encoded = img_data.split(',', 1)
         try:
             img_bytes = base64.b64decode(encoded)
             nparr = np.frombuffer(img_bytes, np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+<<<<<<< HEAD
             rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             
             encs = face_recognition.face_encodings(rgb)
@@ -457,6 +620,20 @@ def upload_face(student_id):
                 return jsonify({'success': False, 'message': 'No face found in image. Please ensure your face is clearly visible.'}), 400
 
             enc = encs[0].tolist()
+=======
+            # convert BGR to RGB for face_recognition
+            rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            if not FACE_RECOG_AVAILABLE:
+                return jsonify({'success': False, 'message': 'face_recognition library not installed on server'}), 500
+
+            encs = face_recognition.face_encodings(rgb)
+            if not encs:
+                return jsonify({'success': False, 'message': 'No face found in image'}), 400
+
+            enc = encs[0].tolist()
+
+            # load existing encodings list or create
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
             existing = []
             if student.face_encoding:
                 try:
@@ -467,6 +644,7 @@ def upload_face(student_id):
             existing.append(enc)
             student.face_encoding = json.dumps(existing)
             db.session.commit()
+<<<<<<< HEAD
             
             # If the student's encodings were updated, force the cam_worker to reload them
             try:
@@ -481,6 +659,15 @@ def upload_face(student_id):
             return jsonify({'success': False, 'message': f'Server error processing image: {str(e)}'}), 500
 
     # GET -> render page
+=======
+
+            return jsonify({'success': True, 'count': len(existing)})
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+
+    # GET -> render page
+    # count existing encodings
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     count = 0
     if student.face_encoding:
         try:
@@ -488,11 +675,16 @@ def upload_face(student_id):
         except Exception:
             count = 0
 
+<<<<<<< HEAD
     return render_template('upload_face.html', student=student, count=count, face_recog_available=FACE_RECOG_AVAILABLE)
+=======
+    return render_template('upload_face.html', student=student, count=count)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
+<<<<<<< HEAD
     # FIX: Cleaned up the try/except block for dashboard to handle fallback gracefully
     try:
         # Prioritize subjects owned by the teacher
@@ -510,6 +702,30 @@ def dashboard():
         flash(f'An error occurred loading the dashboard: {str(e)}')
         return render_template('dashboard.html', subjects=[], subjects_json=[], subjects_count=0)
 
+=======
+    try:
+        # Load all subjects so Manage Subjects always shows the subjects page content
+        subjects = Subject.query.all()
+        # Debug: if requested, return JSON of the subjects used for rendering
+        if request.args.get('raw'):
+            out = [{'id': s.id, 'name': s.name, 'code': s.code, 'teacher_id': s.teacher_id} for s in subjects]
+            return jsonify({'subjects': out})
+        # Debug: optionally include a response header with subjects count
+        if request.args.get('hdr'):
+            resp = make_response(render_template('dashboard.html', subjects=subjects))
+            resp.headers['X-Subjects-Count'] = str(len(subjects))
+            return resp
+        # Prepare JSON payload for the template to render client-side (robust)
+        try:
+            app.logger.info(f"dashboard view: subjects_count={len(subjects)}, ids={[s.id for s in subjects]}")
+        except Exception:
+            app.logger.info('dashboard view: subjects present but failed to log ids')
+        subjects_data = [{'id': s.id, 'name': s.name, 'code': s.code, 'teacher_id': s.teacher_id} for s in subjects]
+        return render_template('dashboard.html', subjects=subjects, subjects_json=subjects_data, subjects_count=len(subjects))
+    except Exception as e:
+        flash(f'Error loading dashboard: {str(e)}')
+        return render_template('dashboard.html', subjects=[])
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 @app.route('/subjects')
 @login_required
@@ -534,6 +750,10 @@ def add_subject():
     flash('Subject added successfully!')
     return redirect(url_for('subjects'))
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/delete_subject', methods=['POST'])
 @login_required
 def delete_subject():
@@ -554,11 +774,23 @@ def delete_subject():
         flash('Subject not found')
         return redirect(url_for('subjects'))
 
+<<<<<<< HEAD
+=======
+    # Only the teacher who owns the subject (or an admin) can delete
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if subject.teacher_id != current_user.id:
         flash('You are not authorized to delete this subject')
         return redirect(url_for('subjects'))
 
     try:
+<<<<<<< HEAD
+=======
+        # remove many-to-many association rows first to avoid orphaned references
+        try:
+            db.session.execute(student_subject.delete().where(student_subject.c.subject_id == sid))
+        except Exception:
+            pass
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         db.session.delete(subject)
         db.session.commit()
         flash('Subject deleted successfully')
@@ -566,6 +798,10 @@ def delete_subject():
         db.session.rollback()
         flash(f'Failed to delete subject: {str(e)}')
 
+<<<<<<< HEAD
+=======
+    # Support AJAX requests
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
         return jsonify({'success': True})
 
@@ -575,11 +811,15 @@ def delete_subject():
 @login_required
 def students(subject_id):
     subject = Subject.query.get_or_404(subject_id)
+<<<<<<< HEAD
     # Ensure only the teacher who owns the subject can view
     if subject.teacher_id != current_user.id:
         flash('You are not authorized to view students for this subject.')
         return redirect(url_for('dashboard'))
 
+=======
+    # find students associated with this subject
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     students = subject.students.all()
     return render_template('students.html', subject=subject, students=students)
 
@@ -590,6 +830,7 @@ def add_student():
     roll_number = request.form['roll_number']
     subject_id = request.form['subject_id']
     
+<<<<<<< HEAD
     student = Student.query.filter_by(roll_number=roll_number).first()
     
     is_new = False
@@ -625,12 +866,42 @@ def add_student():
     else:
         flash('Subject not found.')
         
+=======
+    if Student.query.filter_by(roll_number=roll_number).first():
+        flash('Roll number already exists')
+        return redirect(url_for('students', subject_id=subject_id))
+    
+    # create student; handle legacy DB with student.subject_id column
+    res = db.session.execute(text("PRAGMA table_info(student);"))
+    cols = [r[1] for r in res.fetchall()]
+    if 'subject_id' in cols:
+        now = datetime.utcnow()
+        db.session.execute(
+            text('INSERT INTO student (name, roll_number, face_encoding, created_at, subject_id) VALUES (:name, :roll, :face, :created, :sid)'),
+            {'name': name, 'roll': roll_number, 'face': None, 'created': now, 'sid': int(subject_id)}
+        )
+        last_id = db.session.execute(text('SELECT last_insert_rowid()')).fetchone()[0]
+        db.session.commit()
+        student = Student.query.get(last_id)
+    else:
+        student = Student(name=name, roll_number=roll_number)
+        db.session.add(student)
+        db.session.flush()
+
+    sub = Subject.query.get(subject_id)
+    if sub:
+        student.subjects.append(sub)
+    db.session.commit()
+    
+    flash('Student added successfully!')
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     return redirect(url_for('students', subject_id=subject_id))
 
 @app.route('/attendance/<int:subject_id>')
 @login_required
 def attendance(subject_id):
     subject = Subject.query.get_or_404(subject_id)
+<<<<<<< HEAD
     students_list = subject.students.all() # Renamed to avoid shadowing
     
     today = datetime.now().date()
@@ -646,27 +917,55 @@ def attendance(subject_id):
     return render_template('attendance.html', subject=subject, students=students_list, 
                             attendance_status=attendance_status, today=today,
                             active_session=active_session)
+=======
+    # fetch students associated with this subject
+    students = subject.students.all()
+    
+    # Get today's attendance
+    today = datetime.now().date()
+    attendance_records = Attendance.query.filter_by(subject_id=subject_id, date=today).all()
+    
+    # Create attendance status dictionary
+    attendance_status = {record.student_id: record.status for record in attendance_records}
+    
+    return render_template('attendance.html', subject=subject, students=students, 
+                         attendance_status=attendance_status, today=today)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 @app.route('/start_attendance', methods=['POST'])
 @login_required
 def start_attendance():
+<<<<<<< HEAD
     subject_id = request.form.get('subject_id')
     
+=======
+    subject_id = request.form['subject_id']
+    
+    # Check if there's already an active session
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     active_session = AttendanceSession.query.filter_by(
         subject_id=subject_id, 
         is_active=True
     ).first()
     
     if active_session:
+<<<<<<< HEAD
         return jsonify({'success': False, 'message': 'Attendance session already active', 'session_id': active_session.id})
     
     session_record = AttendanceSession(
+=======
+        return jsonify({'success': False, 'message': 'Attendance session already active'})
+    
+    # Create new attendance session
+    session = AttendanceSession(
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         subject_id=subject_id,
         teacher_id=current_user.id,
         start_time=datetime.utcnow(),
         is_active=True
     )
     
+<<<<<<< HEAD
     db.session.add(session_record)
     db.session.commit()
     
@@ -681,12 +980,19 @@ def start_attendance():
         app.logger.warning(f"Failed to set cam_worker active session: {e}")
         
     return jsonify({'success': True, 'session_id': session_record.id})
+=======
+    db.session.add(session)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'session_id': session.id})
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 @app.route('/stop_attendance', methods=['POST'])
 @login_required
 def stop_attendance():
     session_id = request.form['session_id']
     
+<<<<<<< HEAD
     session_record = AttendanceSession.query.get(session_id)
     if session_record:
         session_record.is_active = False
@@ -703,6 +1009,14 @@ def stop_attendance():
         except Exception:
             pass 
         
+=======
+    session = AttendanceSession.query.get(session_id)
+    if session:
+        session.is_active = False
+        session.end_time = datetime.utcnow()
+        db.session.commit()
+        
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         return jsonify({'success': True})
     
     return jsonify({'success': False, 'message': 'Session not found'})
@@ -713,6 +1027,10 @@ def mark_present():
     student_id = request.form['student_id']
     subject_id = request.form['subject_id']
     
+<<<<<<< HEAD
+=======
+    # Check if already marked today
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     today = datetime.now().date()
     existing = Attendance.query.filter_by(
         student_id=student_id,
@@ -744,6 +1062,7 @@ def video_feed():
 @login_required
 def video():
     def generate_frames():
+<<<<<<< HEAD
         # FIX: The context manager is only needed when accessing DB or models.
         # Initializing the FaceDetectionSystem should ideally be done once outside the generator,
         # but for robustness in a multi-threaded web server, we'll keep the logic.
@@ -761,6 +1080,12 @@ def video():
             flash("Error: Camera is being used by the background attendance worker. Stop the session to view raw feed.")
             return # Should probably redirect or return an error image
 
+=======
+        global face_system
+        if face_system is None:
+            face_system = FaceDetectionSystem()
+            
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         cap = cv2.VideoCapture(0)
         
         while True:
@@ -768,6 +1093,7 @@ def video():
             if not success:
                 break
             
+<<<<<<< HEAD
             if face_system:
                 face_locations = face_system.detect_faces(frame)
                 
@@ -792,6 +1118,26 @@ def video():
          flash("The camera is currently in use by an active attendance session. Please stop the session first.")
          return redirect(url_for('dashboard')) # Redirect user away
          
+=======
+            # Detect faces
+            face_locations = face_system.detect_faces(frame)
+            
+            # Draw rectangles around faces
+            for (top, right, bottom, left) in face_locations:
+                # Draw rectangle around face
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
+                
+                # Draw label
+                cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 255, 0), cv2.FILLED)
+                font = cv2.FONT_HERSHEY_DUPLEX
+                cv2.putText(frame, "Face Detected", (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+            
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
@@ -799,6 +1145,7 @@ def video():
 @login_required
 def stream_worker():
     """Stream MJPEG frames served by the background CameraWorker."""
+<<<<<<< HEAD
     # Ensure worker starts only if not running (and a session is active, ideally)
     # The worker is primarily controlled by start_attendance/stop_attendance
     try:
@@ -806,12 +1153,21 @@ def stream_worker():
             cam_worker.start()
     except Exception as e:
         app.logger.error(f"Error starting cam_worker: {e}")
+=======
+    # start worker lazily
+    try:
+        if not cam_worker.running:
+            cam_worker.start()
+    except Exception:
+        pass
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
     def gen():
         while True:
             frame = cam_worker.get_frame()
             if frame:
                 yield (b'--frame\r\n'
+<<<<<<< HEAD
                         b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
             else:
                 # Return a minimal placeholder frame if camera is not ready
@@ -820,6 +1176,15 @@ def stream_worker():
                 time.sleep(1) # Slow down if no frame to prevent tight loop
                 continue 
             time.sleep(0.03) # Frame rate control
+=======
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            else:
+                # send a tiny blank image if nothing yet
+                blank = b''
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + blank + b'\r\n')
+            time.sleep(0.03)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -828,6 +1193,7 @@ def stream_worker():
 @login_required
 def stream_recognize():
     """Stream MJPEG frames annotated with recognition results from cam_worker."""
+<<<<<<< HEAD
     # This route is usually for the teacher's view during an active session.
     # We should only proceed if a session is active and the worker is running.
     if not cam_worker.active_session or not cam_worker.running:
@@ -860,15 +1226,52 @@ def stream_recognize():
                         annotated = jpg.tobytes()
             except Exception as e:
                 app.logger.error(f"Annotation error: {e}")
+=======
+    # ensure worker is running
+    try:
+        if not cam_worker.running:
+            cam_worker.start()
+    except Exception:
+        pass
+
+    def gen():
+        while True:
+            frame = cam_worker.get_frame()
+            # attempt to annotate the frame with recognition boxes and names
+            annotated = frame
+            try:
+                if frame and cam_worker.last_recognitions:
+                    import numpy as np
+                    nparr = np.frombuffer(frame, np.uint8)
+                    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                    for rec in cam_worker.last_recognitions:
+                        x1, y1, x2, y2 = rec['box']
+                        # box color green if live else red
+                        color = (16,185,129) if rec.get('live') else (220,38,38)
+                        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+                        label = rec.get('name') or ('Unknown')
+                        cv2.putText(img, label, (x1, max(10, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    ret2, jpg = cv2.imencode('.jpg', img)
+                    if ret2:
+                        annotated = jpg.tobytes()
+            except Exception:
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
                 pass
 
             if annotated:
                 yield (b'--frame\r\n'
+<<<<<<< HEAD
                         b'Content-Type: image/jpeg\r\n\r\n' + annotated + b'\r\n')
             else:
                 yield (b'--frame\r\n'
                         b'Content-Type: image/jpeg\r\n\r\n' + b'' + b'\r\n')
                 time.sleep(1) # Throttle on empty frame
+=======
+                       b'Content-Type: image/jpeg\r\n\r\n' + annotated + b'\r\n')
+            else:
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + b'' + b'\r\n')
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
             time.sleep(0.03)
 
     return Response(gen(), mimetype='multipart/x-mixed-replace; boundary=frame')
@@ -877,39 +1280,57 @@ def stream_recognize():
 @app.route('/recognitions_json')
 @login_required
 def recognitions_json():
+<<<<<<< HEAD
     # Only return recognitions if a session is active
     if not cam_worker.active_session:
         return jsonify({'recognitions': [], 'message': 'No active attendance session.'})
     try:
         # NOTE: cam_worker.last_recognitions should be thread-safe in a real app
         # The minimal mock version does not enforce thread safety
+=======
+    # return the last recognitions as JSON
+    try:
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         return jsonify({'recognitions': cam_worker.last_recognitions})
     except Exception:
         return jsonify({'recognitions': []})
 
 
 # Attendance callback to integrate worker recognitions into attendance table
+<<<<<<< HEAD
 # This function is executed inside the cam_worker's thread in a real setup,
 # but it must have an app context to interact with SQLAlchemy.
 def _attendance_callback(rec, subject_id, session_id):
     # The cam_worker should call this function inside the Flask app context.
     # In the minimal mock, this is just a placeholder.
     # Assuming this is called correctly from a background worker with app_context...
+=======
+def _attendance_callback(rec, subject_id, session_id):
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     try:
         sid = rec.get('student_id')
         if not sid or not subject_id:
             return
+<<<<<<< HEAD
         
         today = datetime.now().date()
         existing = Attendance.query.filter_by(student_id=sid, subject_id=subject_id, date=today).first()
         
         if existing:
+=======
+        # check today's record
+        today = datetime.now().date()
+        existing = Attendance.query.filter_by(student_id=sid, subject_id=subject_id, date=today).first()
+        if existing:
+            # update timestamp if already present
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
             existing.status = 'present'
             existing.timestamp = datetime.utcnow()
         else:
             attendance = Attendance(student_id=sid, subject_id=subject_id, date=today, status='present')
             db.session.add(attendance)
 
+<<<<<<< HEAD
         # Snapshot saving logic
         snap = rec.get('snapshot')
         if snap:
@@ -936,13 +1357,44 @@ def worker_set_active():
     # FIX/IMPROVEMENT: Ensure subject_id and session_id are passed and set correctly.
     # This route is now mostly redundant as the logic is in start_attendance
     # but kept for completeness if AJAX calls it separately.
+=======
+        # optional: store snapshot to disk for audit
+        snap = rec.get('snapshot')
+        if snap:
+            try:
+                # create snapshots directory
+                import os
+                snaps_dir = os.path.join(os.getcwd(), 'snapshots')
+                os.makedirs(snaps_dir, exist_ok=True)
+                fname = f"snap_{sid}_{int(time.time())}.jpg"
+                with open(os.path.join(snaps_dir, fname), 'wb') as f:
+                    f.write(snap)
+            except Exception:
+                pass
+
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return
+
+
+# helper route to set active subject/session for camera worker
+@app.route('/worker/set_active', methods=['POST'])
+@login_required
+def worker_set_active():
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     subject_id = request.form.get('subject_id')
     session_id = request.form.get('session_id')
     try:
         cam_worker.active_subject = int(subject_id) if subject_id else None
         cam_worker.active_session = int(session_id) if session_id else None
+<<<<<<< HEAD
         cam_worker.attendance_callback = _attendance_callback
         cam_worker.start() # Start the worker if it's not running
+=======
+        # register callback
+        cam_worker.attendance_callback = _attendance_callback
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         return jsonify({'success': True})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
@@ -951,7 +1403,17 @@ def worker_set_active():
 @app.route('/export_attendance')
 @login_required
 def export_attendance():
+<<<<<<< HEAD
     """Export attendance as CSV or Excel."""
+=======
+    """Export attendance as CSV or Excel.
+
+    Query params:
+      - subject_id (optional)
+      - date (YYYY-MM-DD) optional; defaults to today
+      - format: 'csv' (default) or 'xlsx'
+    """
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     subject_id = request.args.get('subject_id')
     date_str = request.args.get('date')
     fmt = request.args.get('format', 'csv').lower()
@@ -970,6 +1432,7 @@ def export_attendance():
             sid = int(subject_id)
             q = q.filter_by(subject_id=sid)
         except Exception:
+<<<<<<< HEAD
             pass # Ignore invalid subject_id, export all for the date
 
     rows = q.all()
@@ -983,10 +1446,22 @@ def export_attendance():
         import os
         snaps_dir = os.path.join(os.getcwd(), 'snapshots')
         
+=======
+            pass
+
+    rows = q.all()
+
+    # Build CSV in-memory
+    if fmt == 'csv' or not HAVE_OPENPYXL:
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['student_id', 'student_name', 'roll_number', 'subject_id', 'subject_name', 'date', 'status', 'timestamp', 'snapshot'])
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         for r in rows:
             try:
                 student = Student.query.get(r.student_id)
                 subject = Subject.query.get(r.subject_id)
+<<<<<<< HEAD
                 
                 # Search for snapshot file
                 snapshot_file = ''
@@ -1014,6 +1489,20 @@ def export_attendance():
             except Exception:
                 # Log the specific row error but continue with the export
                 app.logger.error(f"Error processing row for student {r.student_id}: {traceback.format_exc()}")
+=======
+                # find snapshot filename pattern if exists
+                snapshot_file = ''
+                import os
+                snaps_dir = os.path.join(os.getcwd(), 'snapshots')
+                if os.path.isdir(snaps_dir):
+                    # pick any matching file for this student on same day (best-effort)
+                    for f in os.listdir(snaps_dir):
+                        if f.startswith(f"snap_{r.student_id}_"):
+                            snapshot_file = f
+                            break
+                writer.writerow([r.student_id, student.name if student else '', student.roll_number if student else '', r.subject_id, subject.name if subject else '', r.date.isoformat(), r.status, r.timestamp.isoformat(), snapshot_file])
+            except Exception:
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
                 continue
 
         output.seek(0)
@@ -1021,6 +1510,7 @@ def export_attendance():
             'Content-Disposition': f'attachment; filename=attendance_{date_obj.isoformat()}.csv'
         })
 
+<<<<<<< HEAD
     if fmt == 'xlsx':
         if not HAVE_OPENPYXL:
             return jsonify({'success': False, 'message': 'openpyxl not installed; install to enable xlsx export'}), 400
@@ -1034,10 +1524,23 @@ def export_attendance():
         import os
         snaps_dir = os.path.join(os.getcwd(), 'snapshots')
         
+=======
+    # Else generate XLSX
+    if fmt == 'xlsx':
+        if not HAVE_OPENPYXL:
+            return jsonify({'success': False, 'message': 'openpyxl not installed; install to enable xlsx export'}), 400
+        from openpyxl import Workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.append(['student_id', 'student_name', 'roll_number', 'subject_id', 'subject_name', 'date', 'status', 'timestamp', 'snapshot'])
+        import os
+        snaps_dir = os.path.join(os.getcwd(), 'snapshots')
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         for r in rows:
             try:
                 student = Student.query.get(r.student_id)
                 subject = Subject.query.get(r.subject_id)
+<<<<<<< HEAD
                 
                 snapshot_file = ''
                 if os.path.isdir(snaps_dir):
@@ -1060,6 +1563,16 @@ def export_attendance():
                 ])
             except Exception:
                 app.logger.error(f"Error processing row for student {r.student_id} in XLSX: {traceback.format_exc()}")
+=======
+                snapshot_file = ''
+                if os.path.isdir(snaps_dir):
+                    for f in os.listdir(snaps_dir):
+                        if f.startswith(f"snap_{r.student_id}_"):
+                            snapshot_file = f
+                            break
+                ws.append([r.student_id, student.name if student else '', student.roll_number if student else '', r.subject_id, subject.name if subject else '', r.date.isoformat(), r.status, r.timestamp.isoformat(), snapshot_file])
+            except Exception:
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
                 continue
 
         bio = io.BytesIO()
@@ -1077,24 +1590,40 @@ def absence_list(subject_id):
     subject = Subject.query.get_or_404(subject_id)
     today = datetime.now().date()
     
+<<<<<<< HEAD
     # Get all students associated with the subject (many-to-many relationship)
     # The original query was complex, let's simplify by using the relationship:
     all_students_for_subject = subject.students.all()
     
     # Get present students today
     present_records_today = Attendance.query.filter(
+=======
+    # Get all students for this subject
+    all_students = Student.query.filter_by(subject_id=subject_id).all()
+    
+    # Get present students today
+    present_students = db.session.query(Student).join(Attendance).filter(
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         Attendance.subject_id == subject_id,
         Attendance.date == today,
         Attendance.status == 'present'
     ).all()
     
     # Find absent students
+<<<<<<< HEAD
     present_ids = {r.student_id for r in present_records_today}
     # Students who are in the subject but whose ID is not in the present_ids set
     absent_students = [s for s in all_students_for_subject if s.id not in present_ids]
     
     return render_template('absence_list.html', subject=subject, 
                             absent_students=absent_students, today=today)
+=======
+    present_ids = [s.id for s in present_students]
+    absent_students = [s for s in all_students if s.id not in present_ids]
+    
+    return render_template('absence_list.html', subject=subject, 
+                         absent_students=absent_students, today=today)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -1103,11 +1632,15 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     db.session.rollback()
+<<<<<<< HEAD
     app.logger.error(f"500 Internal Error: {error}\n{traceback.format_exc()}")
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
     return render_template('error.html', error_message="Internal server error (500)"), 500
 
 @app.errorhandler(Exception)
 def handle_exception(e):
+<<<<<<< HEAD
     # Perform rollback unless it's a non-database-related error
     if not isinstance(e, (FileNotFoundError, ConnectionRefusedError, ImportError)): 
         db.session.rollback()
@@ -1116,6 +1649,12 @@ def handle_exception(e):
     return render_template('error.html', error_message=f"Error: {str(e)}"), 500
 
 
+=======
+    return render_template('error.html', error_message=f"Error: {str(e)}"), 500
+
+
+# Debug-only route: list subjects known to the running app (JSON)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/__debug_subjects')
 def debug_subjects():
     try:
@@ -1125,6 +1664,7 @@ def debug_subjects():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+<<<<<<< HEAD
 @app.route('/__whoami')
 def debug_whoami():
     try:
@@ -1136,10 +1676,24 @@ def debug_whoami():
             'teacher_username': getattr(current_user, 'username', None) if is_authenticated else None,
             'is_student_authenticated': is_student,
             'student_id': session.get('student_user_id', None)
+=======
+
+@app.route('/__whoami')
+def debug_whoami():
+    try:
+        return jsonify({
+            'is_authenticated': bool(getattr(current_user, 'is_authenticated', False)),
+            'id': getattr(current_user, 'id', None),
+            'username': getattr(current_user, 'username', None)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/__debug_dashboard')
 def debug_dashboard():
     try:
@@ -1151,12 +1705,23 @@ def debug_dashboard():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+<<<<<<< HEAD
 @app.route('/__render_test')
 def render_test():
     subs = Subject.query.all()
     # Note: This requires a 'dashboard.html' template
     return render_template('dashboard.html', subjects=subs)
 
+=======
+
+@app.route('/__render_test')
+def render_test():
+    # Render the dashboard template with all subjects (bypasses login) for testing
+    subs = Subject.query.all()
+    return render_template('dashboard.html', subjects=subs)
+
+
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 @app.route('/api/subjects')
 @login_required
 def api_subjects():
@@ -1170,6 +1735,7 @@ def api_subjects():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+<<<<<<< HEAD
 # --- MAIN RUN BLOCK ---
 if __name__ == '__main__':
     with app.app_context():
@@ -1196,6 +1762,12 @@ if __name__ == '__main__':
         except Exception as e:
             app.logger.warning(f"Warning: Could not initialize FaceDetectionSystem (Haar Cascade): {e}")
             
+=======
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
         # Create default teacher if none exists
         if not Teacher.query.first():
             default_teacher = Teacher(
@@ -1207,6 +1779,7 @@ if __name__ == '__main__':
             db.session.commit()
             print("Default teacher created: username=admin, password=admin123")
     
+<<<<<<< HEAD
     # Stop the minimal worker on shutdown
     import atexit
     atexit.register(cam_worker.stop) 
@@ -1838,3 +2411,6 @@ if __name__ == '__main__':
     
     app.run(debug=True, host='0.0.0.0', port=5000)
 >>>>>>> a43efd88c1abf46e3eb56fc98ca023036932b734
+=======
+    app.run(debug=True, host='0.0.0.0', port=5000)
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752

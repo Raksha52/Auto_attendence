@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 # Face Recognition Auto Attendance System
 
 A comprehensive face recognition-based attendance system with dual WiFi connectivity for classroom management.
@@ -19,6 +22,7 @@ A comprehensive face recognition-based attendance system with dual WiFi connecti
 1. **Clone or download the project files**
 
 2. **Install Python dependencies**:
+<<<<<<< HEAD
 =======
 # Auto Attendance System
 
@@ -122,11 +126,16 @@ Auto_Attendance_System/
 
 2. **Install Python dependencies**
 >>>>>>> a43efd88c1abf46e3eb56fc98ca023036932b734
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
    ```bash
    pip install -r requirements.txt
    ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 3. **Set up environment variables** (optional):
    Create a `.env` file in the project root:
    ```
@@ -134,14 +143,20 @@ Auto_Attendance_System/
    ```
 
 4. **Run the application**:
+<<<<<<< HEAD
 =======
 3. **Run the Flask application**
 >>>>>>> a43efd88c1abf46e3eb56fc98ca023036932b734
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
    ```bash
    python app.py
    ```
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 5. **Access the system**:
    - Open your web browser
    - Navigate to `http://localhost:5000`
@@ -240,6 +255,7 @@ For technical support or feature requests, please contact the development team.
 ## License
 
 This project is developed for educational purposes. Please ensure compliance with privacy laws when handling student data.
+<<<<<<< HEAD
 =======
 4. **Open the application**
    - Navigate to `http://localhost:5000` in your browser
@@ -418,3 +434,5 @@ For support and questions:
 
 **Note**: This system is designed for educational and demonstration purposes. For production use, ensure proper security measures, data encryption, and compliance with privacy regulations.
 >>>>>>> a43efd88c1abf46e3eb56fc98ca023036932b734
+=======
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752

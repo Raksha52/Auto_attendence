@@ -1,4 +1,5 @@
 import cv2
+<<<<<<< HEAD
 import json
 import os
 from app import app, Student, db
@@ -16,11 +17,19 @@ try:
 except Exception:
     FACENET_AVAILABLE = False
     facenet_embedding_from_rgb = None
+=======
+import face_recognition
+import json
+import os
+from flask import Flask, db
+from app import app, Student
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
 
 def encode_face_from_image(image_path):
     """Encode a face from an image file"""
     try:
         # Load image
+<<<<<<< HEAD
         if FACE_RECOG_AVAILABLE:
             image = face_recognition.load_image_file(image_path)
             # Find face encodings
@@ -63,6 +72,18 @@ def encode_face_from_image(image_path):
                 return fr_enc
         else:
             print(f"No face found in {image_path} or encoders unavailable")
+=======
+        image = face_recognition.load_image_file(image_path)
+        
+        # Find face encodings
+        face_encodings = face_recognition.face_encodings(image)
+        
+        if len(face_encodings) > 0:
+            # Return the first face encoding
+            return face_encodings[0].tolist()
+        else:
+            print(f"No face found in {image_path}")
+>>>>>>> e0a5a269c49ffcd2d0741aee0a2ad10f37f98752
             return None
             
     except Exception as e:
